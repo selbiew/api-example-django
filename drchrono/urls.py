@@ -6,7 +6,6 @@ admin.autodiscover()
 
 import views
 
-
 urlpatterns = [
     url(r'^setup/$', views.SetupView.as_view(), name='setup'),
     url(r'^welcome/$', views.DoctorWelcome.as_view(), name='setup'),

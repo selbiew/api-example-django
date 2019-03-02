@@ -1,11 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Welcome to drchrono</title>
-</head>
-<body>
-<h1>Welcome {{ doctor.first_name }} {{ doctor.last_name }}</h1>
-{{ doctor }}
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{title}}{% endblock title %}
+{% block meta %}
+{% endblock meta %}
+
+{% block page-content %}
+<h2 class="ui centered header">Welcome Dr. {{doctor.first_name}} {{doctor.last_name}}!</h2>
+<div class="ui centered grid container">   
+    <div class="ui twelve wide column"> 
+        <div class="ui basic segment">
+            <h2 class="ui centered header">Appointments</h2>
+        </div>
+        <div class="ui segments">
+            {% for appointment in appointments %}
+                <div class="ui segment">
+                    <p>{{appointment.patient.first_name}}, {{appointment.doctor.first_name}}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="ui four wide column">
+        <div class="ui basic segment">
+            <h2 class="ui centered header">Statistics</h2>
+        </div>
+        <div class="ui segments">
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">Statistic One</div>
+        </div>
+    </div>
+</div>
+{% endblock page-content %}
+ 
+{% block scripts %}
+{% endblock scripts %}

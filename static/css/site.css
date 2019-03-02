@@ -1,0 +1,45 @@
+:root {
+    --semantic-violet: #5829bb;
+}
+
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0 0 0 0;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0 0 0 0;
+}
+
+.header {
+    height: 10%;
+    margin: 0 0 0 0;
+}
+
+.header .menu {
+    height: 50%;
+    margin: 0 0 0 0;
+    border: none;
+    border-radius: 0 0 0 0;
+    box-shadow: 0 0 0 0;
+}
+
+.header .menu .item {
+    font-size: 1.3em;
+    font-weight: bolder;
+    border: none;
+}
+
+.page-content {
+    min-height: 70%;
+    margin: 0 0 0 0;
+    padding: 0 0 2% 0;
+}
+
+.footer {
+    height: 10%;
+    margin: 0 0 0 0;
+}

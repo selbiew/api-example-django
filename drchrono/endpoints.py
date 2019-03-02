@@ -13,15 +13,12 @@ class NotFound(APIException): pass
 
 class Conflict(APIException): pass
 
-
 ERROR_CODES = {
     403: Forbidden,
     404: NotFound,
     409: Conflict,
 }
 
-
-# TODO: this API abstraction is included for your convenience. If you don't like it, feel free to change it.
 class BaseEndpoint(object):
     """
     A python wrapper for the basic rules of the drchrono API endpoints.
