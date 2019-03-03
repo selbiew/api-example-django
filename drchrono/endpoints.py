@@ -1,15 +1,11 @@
 import requests
 import logging
 
-
 class APIException(Exception): pass
-
 
 class Forbidden(APIException): pass
 
-
 class NotFound(APIException): pass
-
 
 class Conflict(APIException): pass
 
@@ -173,10 +169,8 @@ class BaseEndpoint(object):
         response = requests.delete(url)
         return self._json_or_exception(response)
 
-
 class PatientEndpoint(BaseEndpoint):
     endpoint = "patients"
-
 
 class AppointmentEndpoint(BaseEndpoint):
     endpoint = "appointments"
@@ -197,7 +191,6 @@ class AppointmentEndpoint(BaseEndpoint):
             raise Exception("Must provide either start & end, or date argument")
         return super(AppointmentEndpoint, self).list(params, **kwargs)
 
-
 class DoctorEndpoint(BaseEndpoint):
     endpoint = "doctors"
 
@@ -210,6 +203,8 @@ class DoctorEndpoint(BaseEndpoint):
     def delete(self, id, **kwargs):
         raise NotImplementedError("the API does not allow deleteing doctors")
 
-
 class AppointmentProfileEndpoint(BaseEndpoint):
     endpoint = "appointment_profiles"
+
+class OfficeEndpoint(BaseEndpoint):
+    endpoint = "offices"

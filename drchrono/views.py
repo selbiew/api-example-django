@@ -1,12 +1,12 @@
 import datetime
 from collections import defaultdict
 
-from drchrono.models import Appointment, AppointmentProfile, Doctor, Patient
+from drchrono.models import Appointment, AppointmentProfile, Doctor, Patient, Office
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from social_django.models import UserSocialAuth
 
-from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, AppointmentProfileEndpoint, PatientEndpoint
+from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, AppointmentProfileEndpoint, PatientEndpoint, OfficeEndpoint
 
 
 class SetupView(TemplateView):
@@ -64,7 +64,7 @@ class DoctorWelcome(TemplateView):
 
     def get_patients(self, doctor_id):
         """
-        Use the token we have stored in the DB to make an API request and get all appointment profiles details.
+        Use the token we have stored in the DB to make an API request and get all patient details.
         """
         access_token = self.get_token()
         api = PatientEndpoint(access_token)
@@ -72,13 +72,25 @@ class DoctorWelcome(TemplateView):
 
         return list(appointments)
 
+    def get_offices(self):
+        """
+        Use the token we have stored in the DB to make an API request and get all office details.
+        """
+        access_token = self.get_token()
+        api = OfficeEndpoint(access_token)
+        offices = api.list()
+
+        return list(offices)
+
     def get_context_data(self, **kwargs):
         kwargs = super(DoctorWelcome, self).get_context_data(**kwargs)
         doctor = self.get_doctor()
+        offices = self.get_offices()
         appointments = self.get_appointments(doctor['id'])
         appointment_profiles = self.get_appointment_profiles(doctor['id'])
         patients = self.get_patients(doctor['id'])
         kwargs['doctor'] = Doctor.retrieve(doctor)
+        kwargs['offices'] = [Office.retrieve(office) for office in offices]
         kwargs['patients'] = [Patient.retrieve(patient) for patient in patients]
         kwargs['appointments'] = [Appointment.retrieve(appointment) for appointment in appointments]
         kwargs['appointment_profiles'] = [AppointmentProfile.retrieve(appointment_profile) for appointment_profile in appointment_profiles]

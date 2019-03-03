@@ -11,10 +11,32 @@
         <div class="ui basic segment">
             <h2 class="ui centered header">Appointments</h2>
         </div>
-        <div class="ui segments">
+        <div class="ui styled fluid accordion">
             {% for appointment in appointments %}
-                <div class="ui segment">
-                    <p>{{appointment.patient.first_name}}, {{appointment.doctor.first_name}}</p>
+                <div class="title">
+                    <i class="dropdown icon"></i>
+                    <span>
+                        {{appointment.patient.first_name}} {{appointment.patient.last_name}}
+                    </span>
+                    <span style="float: right;">
+                        {{appointment.scheduled_start_time}} - {{appointment.scheduled_end_time}}
+                    </span>
+                </div>
+                <div class="content">
+                    <div class="ui equal width grid container">
+                        <div class="column">
+                            Reason: {{appointment.reason | default:"None Given"}}
+                        </div>
+                        <div class="column">
+                            Status: {{appointment.status | default:"Unknown"}}
+                        </div>
+                        <div class="column">
+                            Time Waiting: {{appointment.wait_time}} minutes.
+                        </div>
+                        <div class="column">
+                            Location: {{appointment.office.name}} - {{appointment.exam_room}}
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
