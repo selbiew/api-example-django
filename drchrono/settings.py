@@ -118,6 +118,12 @@ LOGIN_URL = 'login/drchrono'
 
 SHELL_PLUS = "ipython"
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ]
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -6,7 +6,7 @@
 
 {% block page-content %}
     <div class="ui text container">
-        <h2 class="ui centered header">Doctor Login</h2>
+        <h2 class="ui centered header">Patient Check In</h2>
         <div class="ui {{color | default:'blue'}} segment">
             <form class="ui form {{state | default:''}}" method="post">
                 {% csrf_token %}
@@ -14,16 +14,20 @@
                     <div class="header">{{header}}</div>
                     <p>{{message}}</p>
                 </div>
-                <div class="field">
-                    <label>DrChrono Username</label>
-                    <input type="text" name="username" placeholder="eg: DrMario" required>
+                <div class="field"> 
+                    <label>First Name</label>
+                    <input type="text" name="first_name" placeholder="eg: Mario" required>
                 </div>
                 <div class="field">
-                    <label>Password</label>
-                    <input type="password" name="password"  placeholder="eg: LetsaGo!123" required>
+                    <label>Last Name</label>
+                    <input type="text" name="last_name"  placeholder="eg: Mario" required>
+                </div>
+                <div class="field">
+                    <label>Last Four Digits of Social Security Number</label>
+                    <input type="password" name="ssn" pattern="[0-9]{4}"  placeholder="eg: 0000" required>
                 </div>
                 <button class="ui blue button" type="reset">Reset</button>
-                <button id="button_authenticate" class="ui green button" type="submit">Authenticate Kiosk</button>
+                <button id="button_authenticate" class="ui green button" type="submit">Check In</button>
             </form>
         </div>
     </div>

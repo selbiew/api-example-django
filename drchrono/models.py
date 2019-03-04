@@ -4,6 +4,19 @@ from django.db import models
 from django.utils.timezone import make_aware
 
 class Appointment(models.Model):
+    STATUS_CHOICES = (
+        ('UNK', ''),
+        ('ARR', 'Arrived'),
+        ('CHK', 'Checked In'),
+        ('CNC', 'Canceled'),
+        ('CMP', 'Complete'),
+        ('CNF', 'Confirmed'),
+        ('INS', 'In Session'),
+        ('NSH', 'No Show'),
+        ('NCF', 'Not Confirmed'),
+        ('RSC', 'Rescheduled'),
+    )
+    
     id = models.IntegerField(primary_key=True)
     doctor = models.ForeignKey('Doctor')
     duration = models.IntegerField()
@@ -12,32 +25,40 @@ class Appointment(models.Model):
     patient = models.ForeignKey('Patient')
     reason = models.CharField(max_length=1024)
     scheduled_start_datetime = models.DateTimeField()
-    checkin_time = models.DateTimeField(null=True)
-    checkout_time = models.DateTimeField(null=True)
-    status = models.CharField(max_length=64, null=True)
+    checkin_datetime = models.DateTimeField(null=True)
+    start_datetime = models.DateTimeField(null=True)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=64, null=True)
     is_walk_in = models.NullBooleanField()
     # recurring_appointsment
     # base_recurring_appointment
 
     @property
     def scheduled_end_datetime(self):
-        return self.scheduled_start_datetime + datetime.timedelta(minutes=float(self.duration))
+        if self.scheduled_start_datetime and self.duration:
+            return self.scheduled_start_datetime + datetime.timedelta(minutes=float(self.duration))
+        return None
 
     @property
     def scheduled_start_time(self):
-        return self.scheduled_start_datetime.time().strftime('%I:%M %p')
+        if self.scheduled_start_datetime:
+            return self.scheduled_start_datetime.time().strftime('%I:%M %p')
+        return None
 
     @property
     def scheduled_end_time(self):
-        return self.scheduled_end_datetime.time().strftime('%I:%M %p')
+        if self.scheduled_end_datetime:
+            return self.scheduled_end_datetime.time().strftime('%I:%M %p')
+        return None
 
     @property
     def wait_time(self):
-        time_waiting = 0
-        if self.status in ['Arrived', 'Checked In'] and self.checkin_time:
-            time_waiting = datetime.datetime.now() - self.checkin_time
+        wait_time = 0
+        if self.start_datetime and self.checkin_datetime:
+            wait_time = self.start_datetime - self.checkin_datetime
+        elif self.status == 'Checked In' and self.checkin_datetime:
+            wait_time = datetime.datetime.now() - self.checkin_datetime
         
-        return time_waiting
+        return wait_time
 
     @property
     def exam_room(self):
@@ -93,7 +114,8 @@ class Office(models.Model):
     @classmethod
     def retrieve(cls, data):
         office, _ = cls.objects.update_or_create(id=data['id'], name=data['name'],
-            doctor_id=data['doctor'], _exam_rooms=json.dumps([o['name'] for o in data['exam_rooms']]),
+            doctor_id=data['doctor'],
+            _exam_rooms=json.dumps([exam_room['name'] for exam_room in data['exam_rooms']]),
         )
         
         return office  
