@@ -7,10 +7,10 @@ admin.autodiscover()
 import views
 
 urlpatterns = [
-    url(r'^setup/$', views.SetupView.as_view(), name='setup'),
-    url(r'^kiosk/$', views.KioskView.as_view(), name='kiosk'),
-    # url(r'^logout/$', views.logout, name='logout'),
-    url(r'^welcome/$', views.DoctorWelcome.as_view(), name='welcome'),
+    url(r'^login/$', views.LoginView.as_view(), name='login'),
+    url(r'^kiosk/$', login_required(views.KioskView.as_view()), name='kiosk'),
+    url(r'^logout/$', views.LogoutView.as_view(), name='logout'),
+    url(r'^welcome/$', login_required(views.DoctorWelcome.as_view()), name='welcome'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('social.apps.django_app.urls', namespace='social')),
 ]

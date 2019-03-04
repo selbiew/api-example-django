@@ -7,36 +7,54 @@ from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from social_django.models import UserSocialAuth
 from django.utils.decorators import method_decorator
-from django.contrib.auth import logout, authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, AppointmentProfileEndpoint, PatientEndpoint, OfficeEndpoint
 
-class SetupView(TemplateView):
+class LoginView(TemplateView):
     """
     The beginning of the OAuth sign-in flow. Logs a user into the kiosk, and saves the token.
     """
-    template_name = 'kiosk_setup.html'
+    template_name = 'login.html'
     def get(self, request):
         if request.user.is_authenticated:
+            if request.GET['next']:
+                return redirect(request.GET['next'])
             return redirect('/kiosk')
-        return render(request, self.template_name, context={'title': 'Kiosk - Setup'})
+        return render(request, self.template_name,
+            context={'title': 'Kiosk - Setup', 'message_type': 'warning'})
 
     def post(self, request):
         context = {}
         user = authenticate(username=request.POST['username'], password=request.POST['password'])
         if user:
-            # Authorize Kiosk 
+            login(request, user)
+            if request.GET['next']:
+                return redirect(request.GET['next'])
             return redirect('/kiosk', context={"title": "Kiosk - Check In"})
         else:
             context['title'] = 'Kiosk - Setup'
             context['color'] = 'red'
             context['state'] = 'error'
+            context['message_type'] = 'error'
             context['header'] = 'Failure'
             context['message'] = 'Unable to log in with that information, please try again.'
         
         return render(request, self.template_name, context=context)
+
+class LogoutView(TemplateView):
+    template_name='login.html'
+
+    def get(self, request):
+        return redirect('/login', context={'message_type': 'warning'})
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            logout(request)
+        
+        return render(request, self.template_name, context={'message_type': 'warning'})
 
 class KioskView(TemplateView):
     template_name = "kiosk.html"
