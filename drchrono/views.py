@@ -86,6 +86,20 @@ class KioskView(TemplateView):
 
     def get(self, request):
         context = {'title': 'Kiosk - Check In', 'message_type': 'warning'}
+        if 'state' in request.GET:
+            state = request.GET['state']
+            if state == 'success':
+                context['color'] = 'green'
+                context['state'] = 'success'
+                context['message_type'] = 'success'
+                context['header'] = 'Success'
+                context['message'] = 'Thanks for checking in!'
+            elif state == 'failure':
+                context['color'] = 'red'
+                context['state'] = 'error'
+                context['message_type'] = 'error'
+                context['header'] = 'Failure'
+                context['message'] = 'Unable to check in, please try again.' 
 
         return render(request, self.template_name, context=context)
 
@@ -167,16 +181,16 @@ class DoctorWelcome(TemplateView):
         
         kwargs['doctor'] = doctor
         kwargs['appointments'] = appointments
-        
-        for appointment in appointments:
-            print(appointment)
 
         return kwargs
 
 class PatientView(TemplateView):
     
     def get(self, request):
-        id = request.GET['id']
+        if 'id' in request.GET:
+            id = request.GET['id']
+        else:
+            return redirect('/kiosk/?state=failure')
         context = {'title': 'Patient Information', 'message_type': 'warning'}
         token = self.get_token()
         patient = serializers.Patient.get(id, token, shallow=False)
@@ -185,32 +199,31 @@ class PatientView(TemplateView):
         return render(request, 'patient.html', context=context)
 
     def post(self, request):
-        context = {}
         token = self.get_token()
+        
         api = PatientEndpoint(token)
         patient = serializers.Patient.get(request.POST['id'], token, shallow=False)
         data = {key: request.POST[key] for key in request.POST if key in patient.__dict__ and key != 'id'}
 
-        response = api.update(id=request.POST['id'], data=data)
+        patient_response = api.update(id=request.POST['id'], data=data)
 
-        if not response:
-            context['color'] = 'green'
-            context['state'] = 'success'
-            context['message_type'] = 'success'
-            context['header'] = 'Success'
-            context['message'] = 'Successfully checked in {last_name}, {first_name}!'.format(
-                last_name=patient.last_name,
-                first_name=patient.first_name)
-        else:
-            context['color'] = 'red'
-            context['state'] = 'error'
-            context['message_type'] = 'error'
-            context['header'] = 'Failure'
-            context['message'] = 'Unable to check in {last_name}, {first_name}, please try again.'.format(
-                last_name=patient.last_name,
-                first_name=patient.first_name)
+        if not patient_response:
+            api = AppointmentEndpoint(token)
+            appointments = list(api.list(params={'patient': patient.id}, date=datetime.datetime.today()))
+            
+            print(appointments)
 
-        return render(request, 'kiosk.html', context=context)
+            if appointments:
+                appointments = [serializers.Appointment.get(a['id'], token, shallow=False, data=a) for a in appointments]
+
+                deltas = [(a.id, abs(datetime.datetime.now() - a.scheduled_start_datetime)) for a in appointments]
+                deltas.sort(key=lambda t: t[1])
+
+                api.update(deltas[0][0], data={'status': 'Arrived'})
+
+                return redirect('/kiosk/?state=success')
+
+        return redirect('/kiosk/?state=failure')
 
     def get_token(self):
         """
