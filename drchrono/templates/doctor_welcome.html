@@ -31,10 +31,10 @@
                             Status: {{appointment.status | default:"Unknown"}}
                         </div>
                         <div class="column">
-                            Time Waiting: {{appointment.wait_time}} minutes.
+                            Time Waiting: {{appointment.wait_time | default:"0"}} minutes.
                         </div>
                         <div class="column">
-                            Location: {{appointment.office.name}} - {{appointment.exam_room}}
+                            Location: {{appointment.office.name}} - {{appointment.exam_room.name}}
                         </div>
                     </div>
                 </div>

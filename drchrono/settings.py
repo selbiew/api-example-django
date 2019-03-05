@@ -113,8 +113,8 @@ STATICFILES_DIRS = (
 SOCIAL_AUTH_DRCHRONO_KEY = config('SOCIAL_AUTH_CLIENT_ID', cast=str)
 SOCIAL_AUTH_DRCHRONO_SECRET = config('SOCIAL_AUTH_SECRET', cast=str)
 
-LOGIN_REDIRECT_URL = '/kiosk/'
-LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/welcome/'
+LOGIN_URL = '/login'
 
 SHELL_PLUS = "ipython"
 

@@ -23,8 +23,22 @@
                     <input type="text" name="last_name"  placeholder="eg: Mario" required>
                 </div>
                 <div class="field">
-                    <label>Last Four Digits of Social Security Number</label>
-                    <input type="password" name="ssn" pattern="[0-9]{4}"  placeholder="eg: 0000" required>
+                    <label>Appointment Type</label>
+                    <div class="ui selection dropdown">
+                        <input type="hidden" id="ddl_appointment_type" name="appointment_type">
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Appointment Type</div>
+                        <div class="menu">
+                            <div id="item_drop_in" class="item" data-value="drop_in">Drop In</div>
+                            <div id="item_scheduled" class="item" data-value="scheduled">Scheduled</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="scheduled_fields" class="fields">
+                    <div class="field">
+                        <label>Last Four Digits of Social Security Number</label>
+                        <input type="password" name="ssn" pattern="[0-9]{4}"  placeholder="eg: 0000" required>
+                    </div>
                 </div>
                 <button class="ui blue button" type="reset">Reset</button>
                 <button id="button_authenticate" class="ui green button" type="submit">Check In</button>
@@ -32,3 +46,22 @@
         </div>
     </div>
 {% endblock page-content %}
+
+{% block scripts %}
+<script>
+    $("#scheduled_fields").children().attr('hidden', true);
+    $("#ddl_appointment_type").change(function() {
+        $("#scheduled_fields").children().attr('hidden', true);
+        let selected_item = $("#ddl_appointment_type").val();
+        switch(selected_item) { 
+            case 'drop_in':
+                break;
+            case 'scheduled':
+                $("#scheduled_fields").children().attr('hidden', false);
+                break;
+            default:
+                break;
+        }
+    });
+</script>
+{% endblock scripts %}

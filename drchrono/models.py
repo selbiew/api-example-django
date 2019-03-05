@@ -1,9 +1,12 @@
 import datetime
 import json
+import ast
+import collections
+import drchrono.endpoints
 from django.db import models
 from django.utils.timezone import make_aware
 
-class Appointment(models.Model):
+class Appointment():
     STATUS_CHOICES = (
         ('UNK', ''),
         ('ARR', 'Arrived'),
@@ -17,20 +20,16 @@ class Appointment(models.Model):
         ('RSC', 'Rescheduled'),
     )
     
-    id = models.IntegerField(primary_key=True)
-    doctor = models.ForeignKey('Doctor')
-    duration = models.IntegerField()
-    office = models.ForeignKey('Office')
-    _exam_room = models.IntegerField()
-    patient = models.ForeignKey('Patient')
-    reason = models.CharField(max_length=1024)
-    scheduled_start_datetime = models.DateTimeField()
-    checkin_datetime = models.DateTimeField(null=True)
-    start_datetime = models.DateTimeField(null=True)
-    status = models.CharField(choices=STATUS_CHOICES, max_length=64, null=True)
-    is_walk_in = models.NullBooleanField()
-    # recurring_appointsment
-    # base_recurring_appointment
+    def __init__(self, id):
+        self.id = data['id']
+        # self.doctor =  get_doctor()
+        # self.office = get_office()
+        # self.patient = get_patient()
+        # self.exam_room = get_exam_room()
+        self.duration = data['duration']
+        self.scheduled_start_datetime = data['scheduled_time']
+        self.status = data['status']
+        self.is_walk_in = data['is_walk_in']
 
     @property
     def scheduled_end_datetime(self):
@@ -41,7 +40,10 @@ class Appointment(models.Model):
     @property
     def scheduled_start_time(self):
         if self.scheduled_start_datetime:
-            return self.scheduled_start_datetime.time().strftime('%I:%M %p')
+            try:
+                return self.scheduled_start_datetime.time().strftime('%I:%M %p')
+            except:
+                pass
         return None
 
     @property
@@ -109,7 +111,9 @@ class Office(models.Model):
 
     @property
     def exam_rooms(self):
-        return json.loads(self._exam_rooms)
+        if self._exam_rooms:
+            return json.loads(self._exam_rooms)
+        return []
 
     @classmethod
     def retrieve(cls, data):
@@ -132,11 +136,42 @@ class Patient(models.Model):
     gender = models.CharField(choices=GENDER_CHOICES, max_length=6, null=True)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64, null=True)
-    
+    _custom_demographics = models.CharField(max_length=2048, null=True)
+
+    @property
+    def custom_demographics(self):
+        if self._custom_demographics:
+            return json.loads(self._custom_demographics)
+        return []
+
     @classmethod
     def retrieve(cls, data):
+        data = collections.defaultdict(str, data)
         patient, _ = cls.objects.update_or_create(id=data['id'], first_name=data['first_name'],
             last_name=data['last_name'], doctor_id=data['doctor'],
-            gender=data['gender'])
+            _custom_demographics=data['custom_demographics'], gender=data['gender'])
         
-        return patient  
+        return patient
+
+class CustomDemographic(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=128)
+    archived = models.NullBooleanField()
+    doctor = models.ForeignKey('Doctor')
+    template_name = models.CharField(max_length=128, null=True)
+    _allowed_values = models.CharField(max_length=2048, null=True)
+    description = models.CharField(max_length=2048, null=True)
+
+    @property
+    def allowed_values(self):
+        if self._allowed_values:
+            return ast.literal_eval(self._allowed_values)
+        return []
+
+    @classmethod
+    def retrieve(cls, data):
+        custom_demographic, _ = cls.objects.update_or_create(id=data['id'], name=data['name'],
+            archived=data['archived'], doctor_id=data['doctor'], template_name=data['template_name'],
+            _allowed_values=data['allowed_values'], description=data['description'])
+        
+        return custom_demographic 

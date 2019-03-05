@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{title}}{% endblock title %}
+{% block meta %}
+{% endblock meta %}
+
+{% block page-content %}
+    <div class="ui text container">
+        <h2 class="ui centered header">Patient Information</h2>
+        <div class="ui {{color | default:'blue'}} segment">
+            <form class="ui form {{state | default:''}}" method="post">
+                {% csrf_token %}
+                <input type="hidden" value="{{patient.id}}" name="id">
+                <div class="ui {{message_type | default:''}} message">
+                    <div class="header">{{header}}</div>
+                    <p>{{message}}</p>
+                </div>
+                <div class="field"> 
+                    <label>First Name</label>
+                    <input type="text" name="first_name" value="{{patient.first_name}}"  disabled>
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" value="{{patient.last_name}}"  disabled>
+                </div>
+
+                <div class="field">
+                    <label>Gender</label>
+                    <div class="ui selection dropdown">
+                        <input type="hidden" id="ddl_gender" value="{{patient.gender}}" name="gender">
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Gender</div>
+                        <div class="menu">
+                            <div class="item" data-value="Male">Male</div>
+                            <div class="item" data-value="Female">Female</div>
+                            <div class="item" data-value="Other">Other</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Ethnicity</label>
+                    <div class="ui selection dropdown">
+                        <input type="hidden" id="ddl_ethnicity" value="{{patient.ethnicity}}" name="ethnicity">
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Ethnicity</div>
+                        <div class="menu">
+                            <div class="item" data-value="hispanic">Hispanic</div>
+                            <div class="item" data-value="not_hispanic">Not Hispanic</div>
+                            <div class="item" data-value="declined">Decline to answer</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Race</label>
+                    <div class="ui selection dropdown">
+                        <input type="hidden" id="ddl_race" value="{{patient.race}}" name="race">
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Race</div>
+                        <div class="menu">
+                            <div class="item" data-value="indian">Indian</div>
+                            <div class="item" data-value="asian">Asian</div>
+                            <div class="item" data-value="black">Black</div>
+                            <div class="item" data-value="hawaiian">Hawaiian</div>
+                            <div class="item" data-value="white">White</div>
+                            <div class="item" data-value="declined">Decline to answer</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>City</label>
+                    <input type="text" name="city" value="{{patient.city}}">
+                </div>
+
+                <button class="ui blue button" type="reset">Reset</button>
+                <button id="button_authenticate" class="ui green button" type="submit">Update Information</button>
+            </form>
+        </div>
+    </div>
+{% endblock page-content %}
