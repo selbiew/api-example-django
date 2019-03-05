@@ -1,13 +1,13 @@
 <div class="header">
-    <div class="ui borderless inverted violet menu">
+    <div class="ui borderless inverted violet menu" style="overflow: hidden;">
         <div class="ui container">
             <div class="item">api-example-django</div>
             <a href="/welcome" class="right floated item">Welcome</a>
             <a href="/kiosk" class="item">Kiosk</a>
             {% if user.is_authenticated %}
-                <form action="/logout/" method="post">
+                <form class="item" action="/logout/" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="item">Log out</a>
+                    <button type="submit" class="ui violet button">Log out</a>
                 </form>
             {% endif %}
         </div>

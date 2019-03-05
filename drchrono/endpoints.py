@@ -209,5 +209,5 @@ class AppointmentProfileEndpoint(BaseEndpoint):
 class OfficeEndpoint(BaseEndpoint):
     endpoint = "offices"
 
-class CustomDemographicEndpoint(BaseEndpoint):
-    endpoint = "custom_demographics"
+class CustomAppointmentFieldEndpoint(BaseEndpoint):
+    endpoint = "custom_appointment_fields"

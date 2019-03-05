@@ -6,7 +6,7 @@
 
 {% block page-content %}
 <h2 class="ui centered header">Welcome Dr. {{doctor.first_name}} {{doctor.last_name}}!</h2>
-<div class="ui centered grid container">   
+<div id="content" class="ui centered grid container">   
     <div class="ui twelve wide column"> 
         <div class="ui basic segment">
             <h2 class="ui centered header">Appointments</h2>
@@ -25,17 +25,30 @@
                 <div class="content">
                     <div class="ui equal width grid container">
                         <div class="column">
-                            Reason: {{appointment.reason | default:"None Given"}}
+                            <b>Reason:</b> {{appointment.reason | default:"None Given"}}
                         </div>
                         <div class="column">
-                            Status: {{appointment.status | default:"Unknown"}}
+                            <b>Status:</b> {{appointment.status | default:"Unknown"}}
                         </div>
                         <div class="column">
-                            Time Waiting: {{appointment.wait_time | default:"0"}} minutes.
+                            <b>Time Spent Waiting:</b> {{appointment.appointment_meta.wait_time | default:"0"}} minutes.
                         </div>
                         <div class="column">
-                            Location: {{appointment.office.name}} - {{appointment.exam_room.name}}
+                            <b>Location:</b> {{appointment.office.name}} - {{appointment.exam_room.name}}
                         </div>
+                        {% if appointment.possible_session %}
+                        <div class="column">
+                            <form class="ui form" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="doctor_id" value="{{doctor.id}}">
+                                <input type="hidden" name="appointment_id" value="{{appointment.id}}">
+                                <input type="hidden" name="patient_id" value="{{appointment.patient.id}}">
+                            <button class="ui {% if appointment.in_session %} red {% else %} green {% endif %} button" type="submit">
+                                {% if appointment.in_session %} Finish {% else %} Start {% endif %} Appointment
+                            </button>
+                        </div>
+                        {% endif %}
+                    </form>
                     </div>
                 </div>
             {% endfor %}
@@ -44,20 +57,40 @@
     
     <div class="ui four wide column">
         <div class="ui basic segment">
-            <h2 class="ui centered header">Statistics</h2>
+            <h2 class="ui centered header">Today's Statistics</h2>
         </div>
         <div class="ui segments">
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
-            <div class="ui segment">Statistic One</div>
+            <div class="ui segment">
+                <h3 class="ui header">Average Wait Time</h3>
+                <p>{{average_wait_time | default:0}} minutes </p>
+            </div>
+            <div class="ui segment">
+                <h3 class="ui header">Total Wait Time</h3>
+                <p>{{total_wait_time | default:0}} minutes </p>
+            </div>
+            <div class="ui segment">
+                <h3 class="ui header">Patients Seen</h3>
+                <p>{{patient_count | default:0}} Patients Seen </p>
+            </div>
         </div>
     </div>
 </div>
 {% endblock page-content %}
  
 {% block scripts %}
+<script>
+    function async_refresh() {
+        $.get('/welcome/', function(data) {
+            start = data.search(/<div id=\"content\"/);
+            end = data.search(/<div class=\"footer\"/) - 1;
+            $("#content").html(data.substring(start, end));
+
+            $('.ui.dropdown').dropdown();
+            $('.ui.accordion').accordion();
+        });
+    }
+    $(function() {
+        setInterval(async_refresh, 4 * 60 * 1000);
+    });
+</script>
 {% endblock scripts %}

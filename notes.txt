@@ -1,2 +1,3 @@
 - Max length on string attributes
 - Python version if not using docker
+- API Usage Throttling at 500

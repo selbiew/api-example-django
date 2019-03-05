@@ -3,6 +3,7 @@ import json
 import ast
 import collections
 import drchrono.endpoints as endpoints
+from drchrono.models import AppointmentMeta
 
 class Appointment:
 
@@ -14,6 +15,21 @@ class Appointment:
         self._exam_room = data['exam_room']
         self.duration = data['duration']
         self.scheduled_start_datetime = datetime.datetime.strptime(data['scheduled_time'], '%Y-%m-%dT%H:%M:%S')
+        try: 
+            self.appointment_meta, _ = AppointmentMeta.objects.get_or_create(id=data['id'])
+            if data['status'] in ['Arrived', 'Checked In', 'In Room'] and self.appointment_meta.arrival_time is None:
+                self.appointment_meta.arrival_time = datetime.datetime.now()
+                self.appointment_meta.save()
+            elif data['status'] in ['In Session', 'Complete'] and self.appointment_meta.start_time is None:
+                self.appointment_meta.start_time = datetime.datetime.now()
+                self.appointment_meta.save()
+            elif data['status'] in ['Cancelled', 'No Show', 'Rescheduled']:
+                self.appointment_meta.arrival_time = None
+                self.appointment_meta.start_time = None
+                self.appointment_meta.save()
+        except Exception as e:
+            print(e)
+            self.appointment_meta = None
         self.reason = data['reason']
         self.status = data['status']
         self.is_walk_in = data['is_walk_in']
@@ -36,6 +52,14 @@ class Appointment:
         return Appointment(data)
 
     @property
+    def in_session(self):
+        return self.status == "In Session"
+
+    @property
+    def possible_session(self):
+        return self.status in ['Arrived', 'Checked In', 'In Room', 'In Session']
+
+    @property
     def scheduled_end_datetime(self):
         if self.scheduled_start_datetime and self.duration:
             return self.scheduled_start_datetime + datetime.timedelta(minutes=float(self.duration))
@@ -55,7 +79,7 @@ class Appointment:
         if self.scheduled_end_datetime:
             return self.scheduled_end_datetime.time().strftime('%I:%M %p')
         return None
-
+            
     @property
     def exam_room(self):
         if self.office:
